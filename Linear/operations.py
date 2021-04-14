@@ -25,8 +25,18 @@ def curve(x):
     return np.sin(3*np.array(x))
 
 
+def zeta(x, truncation_parameter):
+    padded_vec = np.pad(downsample(x), (47, 47), 'constant', constant_values=(0, 0))
+    xi = np.fft.fft(padded_vec)
+    gamma = np.real(np.fft.ifft(1/xi))
+    truncated = gamma[abs(gamma) > truncation_parameter]
+    return truncated / np.sum(truncated)
+
+
 if __name__ == '__main__':
     print(curve(np.linspace(-np.pi, np.pi, 10)))
     print(upsample([1, 3, 5, 6, 9]))
-    print(downsample(upsample([1, 3, 5, 6, 9])))
-
+    print(downsample(np.multiply(1/8, [1, 4, 6, 4, 1])))
+    print(zeta(np.multiply(1/8, [1, 4, 6, 4, 1]), 0.01))
+    print(np.sum(zeta(np.multiply(1/8, [1, 4, 6, 4, 1]), 0.01)))
+    #print(np.append([0] * 4, [3, 4, 5, 1], [0] * 4))
