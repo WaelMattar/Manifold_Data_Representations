@@ -2,7 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import signal
 
-plt.style.use('seaborn-whitegrid')
 
 def upsample(data_points):
     up = [0] * (2*len(data_points)-1)
@@ -51,6 +50,11 @@ def cubic_decompose(data_points, truncation_parameter):
     return [low_resolution, np.subtract(data_points, refined)]
 
 
+def cubic_reconstruct(low_resolution, detail_coefficients):
+    refined = cubic_refine(low_resolution)
+    return np.add(refined, detail_coefficients)
+
+
 def cubic_pyramid(data_points, scale, truncation_parameter):
     coarse_approximation = data_points
     pyramid = []
@@ -63,17 +67,41 @@ def cubic_pyramid(data_points, scale, truncation_parameter):
     return pyramid
 
 
+def cubic_inverse_pyramid(pyramid):
+    reconstructed = pyramid[0]
+    for k in range(len(pyramid) - 1):
+        reconstructed = cubic_reconstruct(reconstructed, pyramid[k+1])
+    return reconstructed
+
+
 def pyramid_visualization(pyramid, interval):
-    x = np.linspace(interval[0], interval[1], len(pyramid[0]))
-    plt.plot(x, pyramid[0], 'o', color='black')
+    fig, axs = plt.subplots(len(pyramid), sharex=True, sharey=True, gridspec_kw={'hspace': 0})
+    fig.suptitle('Pyramid Representation')
+    axs[0].plot(np.linspace(interval[0], interval[1], len(pyramid[0])), pyramid[0], '*', color='red')
+    axs[0].set_ylim(1.2 * min(pyramid[0]), 1.2 * max(pyramid[0]))
+    for k in range(len(pyramid) - 1):
+        axs[k+1].plot(np.linspace(interval[0], interval[1], len(pyramid[k+1])), pyramid[k+1], 'o', color='blue')
+        axs[k+1].set_ylim(1.2 * min(pyramid[k+1]), 1.2 * max(pyramid[k+1]))
+    for ax in axs:
+            ax.label_outer()
     plt.show()
 
 
+def details_layer_plot(detail_coefficients, interval):
+    norms = abs(detail_coefficients)
+    x = np.linspace(interval[0], interval[1], len(detail_coefficients))
+    plt.plot(x, norms, '*', color='blue')
+
+
 if __name__ == '__main__':
-    x = np.linspace(-np.pi, np.pi, 21)
-    print(curve(x))
-    pyramid = cubic_pyramid(curve(x), 2, 0.01)
-    pyramid_visualization(pyramid, [-np.pi, np.pi])
+    grid = np.linspace(-np.pi, np.pi, 41)
+    pyramid1 = cubic_pyramid(curve(grid), 3, 0.01)
+    inv_pyramid = cubic_inverse_pyramid(pyramid1)
+    diff = np.subtract(curve(grid), inv_pyramid)
+    print(np.linalg.norm(diff))
+    pyramid_visualization(pyramid1, [-np.pi, np.pi])
+    details_layer_plot(pyramid1[2], [-np.pi, np.pi])
+
 
 
 
