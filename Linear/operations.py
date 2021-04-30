@@ -80,7 +80,7 @@ def pyramid_visualization(pyramid, interval):
     axs[0].plot(np.linspace(interval[0], interval[1], len(pyramid[0])), pyramid[0], '*', color='red')
     for k in range(1, len(pyramid)):
         axs[k].plot(np.linspace(interval[0], interval[1], len(pyramid[k])), pyramid[k], 'o', color='blue')
-    plt.show()
+    return
 
 
 def add_noise(x, std):
@@ -89,17 +89,17 @@ def add_noise(x, std):
 
 
 def details_shrink(detail_layer, threshold):
-    detail_layer[detail_layer < threshold] = 0
-    return detail_layer
+    sparse = detail_layer.copy()
+    sparse[np.abs(sparse) < threshold] = 0
+    return sparse
 
 
 if __name__ == '__main__':
-    grid = np.linspace(-np.pi, np.pi, 41)
-    pyramid1 = cubic_pyramid(curve(grid), 3, .001)
-    inv_pyramid = cubic_inverse_pyramid(pyramid1)
-    diff = np.subtract(curve(grid), inv_pyramid)
-    print(np.linalg.norm(diff))
-    pyramid_visualization(pyramid1, [-np.pi, np.pi])
+    grid = np.linspace(-np.pi, np.pi, 101)
+    points = curve(grid)
+    filtered = details_shrink(points, 0.8)
+    plt.plot(grid, points, color='r')
+    plt.plot(grid, filtered, color='b')
     plt.show()
 
 
