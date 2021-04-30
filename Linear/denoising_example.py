@@ -33,4 +33,3 @@ plt.title('Dashed Ground Truth with Noise-Free Curve')
 op.pyramid_visualization(noisy_pyramid, [-np.pi, np.pi])
 plt.show()
 
-
