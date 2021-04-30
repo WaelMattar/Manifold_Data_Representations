@@ -12,7 +12,7 @@ def upsample(data_points):
 
 def downsample(data_points):
     down = []
-    for i in range(np.int((len(data_points) + 1)/2)):
+    for i in range(np.int64((len(data_points) + 1)/2)):
         down = np.append(down, data_points[2 * i])
     return down
 
@@ -75,32 +75,34 @@ def cubic_inverse_pyramid(pyramid):
 
 
 def pyramid_visualization(pyramid, interval):
-    fig, axs = plt.subplots(len(pyramid), sharex=True, sharey=True, gridspec_kw={'hspace': 0})
-    fig.suptitle('Pyramid Representation')
+    fig, axs = plt.subplots(len(pyramid), sharex=True, gridspec_kw={'hspace': 0})
+    axs[0].title.set_text('Pyramid Representation')
     axs[0].plot(np.linspace(interval[0], interval[1], len(pyramid[0])), pyramid[0], '*', color='red')
-    axs[0].set_ylim(1.2 * min(pyramid[0]), 1.2 * max(pyramid[0]))
-    for k in range(len(pyramid) - 1):
-        axs[k+1].plot(np.linspace(interval[0], interval[1], len(pyramid[k+1])), pyramid[k+1], 'o', color='blue')
-        axs[k+1].set_ylim(1.2 * min(pyramid[k+1]), 1.2 * max(pyramid[k+1]))
-    for ax in axs:
-            ax.label_outer()
+    for k in range(1, len(pyramid)):
+        axs[k].plot(np.linspace(interval[0], interval[1], len(pyramid[k])), pyramid[k], 'o', color='blue')
     plt.show()
 
 
-def details_layer_plot(detail_coefficients, interval):
-    norms = abs(detail_coefficients)
-    x = np.linspace(interval[0], interval[1], len(detail_coefficients))
-    plt.plot(x, norms, '*', color='blue')
+def add_noise(x, std):
+    noise = np.random.normal(0, std, len(x))
+    return x + noise
+
+
+def details_shrink(detail_layer, threshold):
+    detail_layer[detail_layer < threshold] = 0
+    return detail_layer
 
 
 if __name__ == '__main__':
     grid = np.linspace(-np.pi, np.pi, 41)
-    pyramid1 = cubic_pyramid(curve(grid), 3, 0.01)
+    pyramid1 = cubic_pyramid(curve(grid), 3, .001)
     inv_pyramid = cubic_inverse_pyramid(pyramid1)
     diff = np.subtract(curve(grid), inv_pyramid)
     print(np.linalg.norm(diff))
     pyramid_visualization(pyramid1, [-np.pi, np.pi])
-    details_layer_plot(pyramid1[2], [-np.pi, np.pi])
+    plt.show()
+
+
 
 
 
