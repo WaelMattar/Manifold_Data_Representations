@@ -18,8 +18,19 @@ def downsample(data_points):
 
 
 def cubic_refine(data_points):
-    alpha = np.multiply(1/8, [1, 4, 6, 4, 1])
-    return signal.convolve(upsample(data_points), alpha, mode='same')
+    length = len(data_points)
+    even = np.array([1/2, 1/2])
+    odd = np.array([1/8, 3/4, 1/8])
+    new_points = [0] * (2 * length - 1)
+    for idx in range(1, length - 1):
+        avg_points = [data_points[idx - 1], data_points[idx], data_points[idx + 1]]
+        new_points[2 * idx] = average(avg_points, odd)
+    new_points[0] = average([data_points[0], data_points[0], data_points[1]], odd)
+    new_points[-1] = average([data_points[-2], data_points[-1], data_points[-1]], odd)
+    for idx in range(length-1):
+        avg_points = [data_points[idx], data_points[idx + 1]]
+        new_points[2 * idx + 1] = average(avg_points, even)
+    return new_points
 
 
 def cubic_decimate(data_points, truncation_parameter):
@@ -95,12 +106,14 @@ def details_shrink(detail_layer, threshold):
 
 
 if __name__ == '__main__':
-    grid = np.linspace(-np.pi, np.pi, 101)
-    points = curve(grid)
-    filtered = details_shrink(points, 0.8)
-    plt.plot(grid, points, color='r')
-    plt.plot(grid, filtered, color='b')
-    plt.show()
+    # grid = np.linspace(-np.pi, np.pi, 101)
+    # points = curve(grid)
+    # filtered = details_shrink(points, 0.8)
+    # plt.plot(grid, points, color='r')
+    # plt.plot(grid, filtered, color='b')
+    # plt.show()
+    pts = np.array([1, -1, 0, 3, 2, -1, 2])
+    npts = cubic_refine(pts)
 
 
 

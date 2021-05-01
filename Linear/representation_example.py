@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import math
 import Linear.operations as op
+import math
 
 # grid definition
 level_of_sampling = 6
